@@ -1,0 +1,255 @@
+1. Configuración del Proyecto
+Primero, vamos a configurar un nuevo proyecto de React con TypeScript y SASS.
+
+sh
+Copy code
+
+npx create-react-app todo-list --template typescript
+cd todo-list
+npm install sass
+2. Estructura del Proyecto
+Organiza tu proyecto con la siguiente estructura:
+
+Copy code
+
+src/
+|-- components/
+|   |-- TaskForm.tsx
+|   |-- TaskList.tsx
+|-- styles/
+|   |-- App.scss
+|   |-- TaskForm.scss
+|   |-- TaskList.scss
+|-- App.tsx
+|-- index.tsx
+|-- types.ts
+3. Definición de Tipos
+Crea src/types.ts para definir los tipos que utilizarás en la aplicación:
+
+typescript
+Copy code
+
+export interface Task {
+  id: number;
+  text: string;
+  completed: boolean;
+}
+4. Componente Principal App.tsx
+Edita src/App.tsx para definir la lógica principal de la aplicación:
+
+tsx
+Copy code
+
+import React, { useState } from 'react';
+import { Task } from './types';
+import TaskForm from './components/TaskForm';
+import TaskList from './components/TaskList';
+import './styles/App.scss';
+
+const App: React.FC = () => {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  
+  const addTask = (taskText: string) => {
+    const newTask: Task = {
+      id: Date.now(),
+      text: taskText,
+      completed: false,
+    };
+    setTasks([...tasks, newTask]);
+  };
+
+  const toggleTaskCompletion = (taskId: number) => {
+    setTasks(tasks.map(task => 
+      task.id === taskId ? { ...task, completed: !task.completed } : task
+    ));
+  };
+
+  const deleteTask = (taskId: number) => {
+    setTasks(tasks.filter(task => task.id !== taskId));
+  };
+
+  return (
+    <div className="app">
+      <h1>Lista de Tareas</h1>
+      <TaskForm addTask={addTask} />
+      <TaskList 
+        tasks={tasks} 
+        toggleTaskCompletion={toggleTaskCompletion}
+        deleteTask={deleteTask}
+      />
+    </div>
+  );
+};
+
+export default App;
+5. Componente TaskForm.tsx
+Crea src/components/TaskForm.tsx para manejar la adición de nuevas tareas:
+
+tsx
+Copy code
+
+import React, { useState } from 'react';
+import './TaskForm.scss';
+
+interface TaskFormProps {
+  addTask: (taskText: string) => void;
+}
+
+const TaskForm: React.FC<TaskFormProps> = ({ addTask }) => {
+  const [taskText, setTaskText] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (taskText.trim()) {
+      addTask(taskText);
+      setTaskText('');
+    }
+  };
+
+  return (
+    <form className="task-form" onSubmit={handleSubmit}>
+      <input 
+        type="text" 
+        value={taskText} 
+        onChange={(e) => setTaskText(e.target.value)} 
+        placeholder="Nueva Tarea"
+      />
+      <button type="submit">Añadir</button>
+    </form>
+  );
+};
+
+export default TaskForm;
+6. Componente TaskList.tsx
+Crea src/components/TaskList.tsx para mostrar la lista de tareas:
+
+tsx
+Copy code
+
+import React from 'react';
+import { Task } from '../types';
+import './TaskList.scss';
+
+interface TaskListProps {
+  tasks: Task[];
+  toggleTaskCompletion: (taskId: number) => void;
+  deleteTask: (taskId: number) => void;
+}
+
+const TaskList: React.FC<TaskListProps> = ({ tasks, toggleTaskCompletion, deleteTask }) => {
+  return (
+    <ul className="task-list">
+      {tasks.map(task => (
+        <li key={task.id} className={task.completed ? 'completed' : ''}>
+          <span onClick={() => toggleTaskCompletion(task.id)}>{task.text}</span>
+          <button onClick={() => deleteTask(task.id)}>Eliminar</button>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+export default TaskList;
+7. Estilos SASS
+Crea los archivos SASS para estilizar la aplicación:
+
+src/styles/App.scss
+scss
+Copy code
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  padding: 20px;
+}
+
+.app {
+  max-width: 600px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+src/styles/TaskForm.scss
+scss
+Copy code
+
+.task-form {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+
+  input {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
+  }
+
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #0056b3;
+    }
+  }
+}
+src/styles/TaskList.scss
+scss
+Copy code
+
+.task-list {
+  list-style: none;
+  padding: 0;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+
+    &.completed {
+      text-decoration: line-through;
+      color: #888;
+    }
+
+    span {
+      cursor: pointer;
+    }
+
+    button {
+      background-color: #dc3545;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+      padding: 5px 10px;
+
+      &:hover {
+        background-color: #c82333;
+      }
+    }
+  }
+}
+8. Ejecutar la Aplicación
+Finalmente, ejecuta la aplicación:
+
+sh
+Copy code
+
+npm start
+Ahora deberías tener una aplicación funcional de lista de tareas que utiliza React, TypeScript y SASS, y hace uso de los hooks más importantes de React. Puedes seguir mejorando la aplicación añadiendo más características y estilos según tus necesidades.
